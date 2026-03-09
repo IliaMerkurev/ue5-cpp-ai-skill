@@ -1,6 +1,6 @@
 ---
 name: unreal cpp developer
-description: Instructions for working with Unreal Engine C++ plugins
+description: Instructions and architectural standards for Unreal Engine 5 C++ development
 ---
 
 # Unreal Engine 5 C++ Modern Development
