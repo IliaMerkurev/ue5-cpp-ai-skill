@@ -28,7 +28,7 @@ These choices are independent of the tracker. For example, a team can choose its
 
 For live work, connect your assistant to the target Unreal Editor. The assistant discovers the operations available in that session, including tools added by enabled extensions. In UE 5.8, VibeUE adds tools to Unreal's native MCP connection. Source-only projects can use all project setup and C++ workflows. [Editor connection guide](.agent/skills/unreal-cpp-developer/references/editor-mcp.md)
 
-## What it covers
+## C++ engineering guidelines
 
 - **Ownership and loading:** reflected strong references, weak observation, soft loading, and legitimate hard references; pointer types follow lifetime and loading needs.
 - **Reflection and authoring:** Details, Blueprint, and Sequencer access; correct `Interp` placement; handling direct property writes without assuming setters run.
