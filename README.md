@@ -1,8 +1,30 @@
-# Unreal Engine 5 C++ AI Developer Skill
+# Unreal Engine 5 project skill
 
-A reusable instruction package for AI coding assistants working on Unreal Engine 5 C++ games, components, and plugins. It combines Unreal-specific engineering guidance with project overrides, Blueprint-friendly APIs, and a strict **tooltip-only comment policy for generated code**.
+A reusable skill for AI assistants working on Unreal Engine 5 projects. It helps establish project rules, develop C++ and Blueprint features, and work in a running Unreal Editor through MCP when connected. The skill ID remains `unreal-cpp-developer`.
 
-The skill guides implementation and review; it does not guarantee compilation, runtime correctness, or performance. Engine version, project requirements, and actual validation remain authoritative.
+## Get started in your language
+
+Install the skill in your assistant and open the Unreal project. Use your own words to ask it to set up your team's workflow. Here are three ways to ask.
+
+- “Let's get you set up to work in this project.”
+- «Давай договоримся, как ты будешь работать с этим проектом».
+- 「このプロジェクトで今後どう作業するか、一緒に決めておこう。」
+
+These are examples. The assistant recognizes the intent across languages and responds in the language you use. To explore the options first, just ask for an explanation. To revise one choice later, say what changed, for example “We've moved our tasks to Linear.”
+
+On setup, the assistant reads existing project and plugin rules. It asks about unresolved choices such as Editor access, project management, where documentation belongs and which tracker the team uses. It records the answers in the project's existing instructions or a scoped `AGENTS.md`. Project documents can have a different language from the conversation. Future requests use these rules directly. Repeating setup preserves manual edits and applies new decisions.
+
+### Choose how to manage work
+
+| Project preference | What the assistant does |
+| --- | --- |
+| Built-in project management | Tracks scope, decisions, milestones and acceptance checks when a task needs coordination. |
+| A team-selected PM skill | Uses the named skill for coordination. You can pick `project-development-manager` or give the name or path of your team's own skill. Unreal engineering stays with this skill. |
+| Off | Works on the requested Unreal task and follows the project's documentation rules. Plans or tracker updates can still be requested individually. |
+
+These choices are independent of the tracker. For example, a team can choose its own PM skill with a local task list, or turn PM off and still ask for a GitHub issue update. You can switch the PM choice later without redoing setup.
+
+For live work, connect your assistant to the target Unreal Editor. The assistant discovers the operations available in that session, including tools added by enabled extensions. In UE 5.8, VibeUE adds tools to Unreal's native MCP connection. Source-only projects can use all project setup and C++ workflows. [Editor connection guide](.agent/skills/unreal-cpp-developer/references/editor-mcp.md)
 
 ## What it covers
 
@@ -24,19 +46,21 @@ The supplied formatter disables automatic namespace comments. Formatting alone d
 
 ## Package layout
 
-- [SKILL.md](.agent/skills/unreal-cpp-developer/SKILL.md): generic Unreal guidance and the comment policy.
-- [custom_rules.md](.agent/skills/unreal-cpp-developer/custom_rules.md): project-specific overrides; no sample project requirements are enabled by default.
-- [templates/](.agent/skills/unreal-cpp-developer/templates/): adaptable UObject header/source examples, with agent-facing instructions.
-- [.clang-format](.clang-format): a starting formatting configuration; retain an existing project's conventions where applicable.
+- [SKILL.md](.agent/skills/unreal-cpp-developer/SKILL.md) contains workflow selection, documentation, delivery and Unreal C++ guidance.
+- [Project setup](.agent/skills/unreal-cpp-developer/references/project-setup.md) covers first use, legacy project rules and subsequent revisions.
+- [Editor and MCP](.agent/skills/unreal-cpp-developer/references/editor-mcp.md) covers capabilities, asset edits and verification.
+- [custom_rules.md](.agent/skills/unreal-cpp-developer/custom_rules.md) remains available for installations with existing overrides.
+- [templates/](.agent/skills/unreal-cpp-developer/templates/) contains adaptable UObject header and source examples.
+- [.clang-format](.clang-format) provides a starting formatting configuration.
 
 The repository keeps its existing `.agent/skills/unreal-cpp-developer` layout for compatibility. Maintain one installed copy of the skill, not separate competing copies for different editors.
 
 ## Installation and use
 
 1. Download or clone this repository.
-2. Copy the entire `unreal-cpp-developer` directory, including `custom_rules.md` and `templates`, into the skill location supported by your assistant. If your setup uses `.agent/skills`, preserve that layout; if it uses `.agents/skills`, copy the same directory there instead.
+2. Copy the entire `unreal-cpp-developer` directory, including `references/` and `templates/`, into the skill location supported by your assistant. Use `.agent/skills` or `.agents/skills` according to your client's conventions.
 3. Configure your assistant to load `SKILL.md`, or explicitly reference it in your request. Folder naming alone does not guarantee automatic discovery in every editor.
-4. Add your team's requirements to `custom_rules.md` or reference existing authoritative project documents. Keep product-specific rules separate from the shared skill.
+4. Ask the assistant to set up the project's working agreements in your language. You can also start directly with a development task.
 5. Use the formatting file only if it fits the project and installed clang-format version. Do not overwrite existing formatting configuration blindly.
 
 The skill identifier is `unreal-cpp-developer`. Existing setups that refer to the old space-separated identifier may need their reference updated; the repository folder path is unchanged.
@@ -45,9 +69,7 @@ For a new class, the assistant reads the templates, chooses the actual Actor/Com
 
 ## Updating an existing installation
 
-This revision combines broader Unreal guidance with ownership, lifecycle, mutable-setting, and compatibility refinements. It corrects unconditional Tick disabling, blanket soft-reference recommendations, universal string-key replacement, and overly broad threading claims.
-
-Replace the generic skill and templates together, but preserve your own `custom_rules.md` contents and review the new policy before applying it. Project-specific version numbering, component contracts, and validation restrictions are not bundled as generic Unreal requirements.
+Keep your existing `custom_rules.md` and project/plugin-specific instructions when updating the installed package. Bring in the updated `SKILL.md`, templates and `references/` together. Ask the assistant to bring the project's working rules up to date. It can link to existing authoritative files or migrate agreed rules from a replaceable installation into the project. Keep the original until you have reviewed the migration.
 
 Validation must follow the user's authorization. A source review or skill-format check does not establish that generated C++ compiles or works in Unreal.
 

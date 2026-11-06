@@ -1,17 +1,37 @@
 ---
 name: unreal-cpp-developer
-description: Write, review, and refactor Unreal Engine 5 C++ Actors, Components, UObjects, gameplay systems, plugins, and Blueprint-facing APIs with appropriate ownership, lifecycle, and module boundaries.
+description: Work on Unreal Engine 5 C++, plugins, Blueprints and live Editor assets through available MCP tools. Use also when a user asks in any language to establish, import or revise an Unreal project's agent workflow, including project rules, optional project-management skills, documentation, task tracking and Editor access.
 ---
 
-# Unreal Engine 5 C++ development
+# Unreal Engine project development
 
 ## Project context and scope
 
-Before changing code, read the repository's engineering instructions and [custom_rules.md](custom_rules.md). Explicit user instructions and project requirements take precedence over these generic defaults. Use the project's engine version and inspect installed engine headers when reflection, compiler, or lifecycle behavior is uncertain.
+Read the instructions for the target repository and affected project/plugin, including existing [custom rules](custom_rules.md). Apply explicit user instructions and scoped project conventions before the defaults here. Identify the relevant `.uproject` or `.uplugin` and the engine version. Check installed engine headers or version-matched documentation when API or lifecycle behavior is uncertain.
 
-Apply this skill to Unreal C++ and its Blueprint integration. Do not use it to impose an architecture on unrelated engines or Blueprint-only work. Preserve the project's chosen C++/Blueprint division; C++ is appropriate for reusable logic and performance-sensitive work, while Blueprint remains a first-class authoring and integration surface.
+Infer the workflow from the user's intent. Use their language for conversation, setup questions and results. Keep project documents in the team's chosen writing language.
 
-Preserve public names, serialized properties, and existing Blueprint assets. Prefer compatible wrappers or deprecation paths for API corrections. Identify unavoidable behavior changes and migration steps.
+- **Establish or change the project's working agreements.** Follow [Project setup](references/project-setup.md), including for an existing project. Any natural phrasing can trigger it. A request for advice or a preview calls for a read-only response. Configuring a gameplay feature, fixing a bug, or simply opening a new repository does not start onboarding.
+- **Inspect or change something in Unreal Editor.** Follow [Editor and MCP](references/editor-mcp.md). Use the operations the connected project actually exposes. A Blueprint-only request can stay entirely in Blueprint.
+- **Write, debug or review source.** Use the C++ guidance below for relevant code. Preserve the project's C++/Blueprint division, public names, serialized properties and asset references. Identify the migration path for an unavoidable compatibility change.
+
+## Choose the project's management workflow
+
+Read the choice recorded for this project. An installed skill, a tracker link or the language of the conversation cannot establish that choice. Use one management workflow:
+
+- **Built-in.** For a substantial feature, agree on the outcome, scope and acceptance check. Record decisions, dependencies and meaningful changes of status in the team's chosen documents or tracker. Keep proposals distinguishable from accepted requirements. For a small fix, a change description and its check usually suffice.
+- **External skill.** Load the specific PM skill selected by the team when coordination is needed. It owns planning, milestone tracking and PM reports within the project's conventions. Keep Unreal implementation and verification here. If the selected skill is unavailable, report the gap when it affects the task and continue independent engineering work. Use a fallback only when the team has chosen one.
+- **Off.** Run engineering tasks without initiating planning cycles, backlog maintenance or PM reports. Honor explicit requests and the team's standing documentation rules. A one-time request to prepare a plan or update an issue does not change the saved mode.
+
+An existing project with no recorded choice can keep its current workflow. For an ordinary engineering task, proceed without introducing PM. Resolve the preference during setup or when a coordination request depends on it.
+
+## Project documentation and verification
+
+In any mode, follow the team's documentation language, sources and update policy. Typical homes are `AGENTS.md` for durable working rules, `PROJECT.md` for accepted requirements, and `docs/STATUS.md` for current implementation, evidence and known gaps. Use an architecture note for a decision future contributors need to understand. Create or update records as the agreed workflow requires.
+
+Use the team's chosen tracker for active tasks when applicable (for example Linear, GitHub Issues or a local plan). Reference existing issues instead of keeping a second board. Selecting a tracker or PM skill alone grants no write access. If an agreed update requires unavailable access, identify that pending update.
+
+Trace the behavior to the code, asset or instance that owns it and check the outcome in the relevant environment. State which checks actually ran, such as static review, compilation, Blueprint validation, PIE, packaging or a target-device check. Keep plans, reviews and implementation within the user's requested scope.
 
 ## Comments and templates
 

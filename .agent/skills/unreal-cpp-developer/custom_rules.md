@@ -1,8 +1,8 @@
 # Project-specific rules
 
-Read this file before changing code. Add concrete project requirements here; they override the generic skill where applicable. Explicit user instructions and repository engineering instructions remain authoritative.
+Read existing entries as project-specific overrides within their original scope. Explicit user instructions and repository engineering instructions remain authoritative. For a new project or a change of workflow, follow [Project setup](references/project-setup.md) and keep new working agreements in the project-owned rules file.
 
-No project-specific rules are enabled in this distributed file. Keep product-specific conventions out of the shared Unreal skill.
+No project-specific rules are enabled in this distributed file. If a shared installation contains rules from an earlier project, establish their scope before applying or importing them into another repository.
 
 Useful topics for your own rules include:
 
