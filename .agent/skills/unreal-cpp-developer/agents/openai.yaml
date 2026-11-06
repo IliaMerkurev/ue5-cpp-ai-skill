@@ -1,0 +1,4 @@
+interface:
+  display_name: "Unreal Engine Development"
+  short_description: "Build and debug UE5 projects, plugins and Editor workflows"
+  default_prompt: "Use $unreal-cpp-developer to help me work on this Unreal project using its existing rules."

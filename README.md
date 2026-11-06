@@ -49,21 +49,27 @@ The supplied formatter disables automatic namespace comments. Formatting alone d
 - [SKILL.md](.agent/skills/unreal-cpp-developer/SKILL.md) contains workflow selection, documentation, delivery and Unreal C++ guidance.
 - [Project setup](.agent/skills/unreal-cpp-developer/references/project-setup.md) covers first use, legacy project rules and subsequent revisions.
 - [Editor and MCP](.agent/skills/unreal-cpp-developer/references/editor-mcp.md) covers capabilities, asset edits and verification.
+- [Build and plugin diagnostics](.agent/skills/unreal-cpp-developer/references/build-and-debug.md) covers build targets, failure stages and checks for dependent assets.
 - [custom_rules.md](.agent/skills/unreal-cpp-developer/custom_rules.md) remains available for installations with existing overrides.
 - [templates/](.agent/skills/unreal-cpp-developer/templates/) contains adaptable UObject header and source examples.
 - [.clang-format](.clang-format) provides a starting formatting configuration.
 
-The repository keeps its existing `.agent/skills/unreal-cpp-developer` layout for compatibility. Maintain one installed copy of the skill, not separate competing copies for different editors.
-
 ## Installation and use
 
-1. Download or clone this repository.
-2. Copy the entire `unreal-cpp-developer` directory, including `references/` and `templates/`, into the skill location supported by your assistant. Use `.agent/skills` or `.agents/skills` according to your client's conventions.
-3. Configure your assistant to load `SKILL.md`, or explicitly reference it in your request. Folder naming alone does not guarantee automatic discovery in every editor.
-4. Ask the assistant to set up the project's working agreements in your language. You can also start directly with a development task.
-5. Use the formatting file only if it fits the project and installed clang-format version. Do not overwrite existing formatting configuration blindly.
+Copy the entire [`unreal-cpp-developer` folder](.agent/skills/unreal-cpp-developer/) into **one** of the parent directories below. Project paths are relative to your Unreal repository. User paths apply to projects on that machine. Inside `unreal-cpp-developer/`, keep `SKILL.md` next to `references/` and `templates/`.
 
-The skill identifier is `unreal-cpp-developer`. Existing setups that refer to the old space-separated identifier may need their reference updated; the repository folder path is unchanged.
+| Local client | One project | All projects for this user |
+| --- | --- | --- |
+| [Codex](https://learn.chatgpt.com/docs/build-skills) | `.agents/skills/` | `~/.agents/skills/` |
+| [Claude Code](https://code.claude.com/docs/en/skills) | `.claude/skills/` | `~/.claude/skills/` |
+
+For other clients, use their documented skill location. The source folder here retains its original `.agent/skills/` layout for clients configured to read it. The optional `.clang-format` is independent of skill installation.
+
+Open a fresh session from the Unreal repository and check that the client's skill list includes `unreal-cpp-developer`. Then ask in your own language to set up how you will work together, without giving a skill name or path. The expected first step is to inspect project conventions and ask about unresolved choices. You can also start with a development task.
+
+Codex CLI `0.167.0-alpha.4` discovered the skill in fresh sessions from both documented locations in an isolated test. That check queried the skill list. Selection for a natural-language request is a separate check. The Claude Code paths above follow Anthropic's documentation.
+
+To move between computers, keep project-scoped skills and project-owned rules in version control, or install the user-scoped copy on each machine. For live Editor work, connect the local client to the correct Unreal instance on that machine and run the [Editor smoke test](tests/editor-smoke.md).
 
 For a new class, the assistant reads the templates, chooses the actual Actor/Component/Subsystem/UObject base, fills in the requested behavior, and removes instructional comments from the output. For existing code, it preserves public APIs and avoids unrelated rewrites.
 

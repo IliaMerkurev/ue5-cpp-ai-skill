@@ -1,6 +1,6 @@
 ---
 name: unreal-cpp-developer
-description: Work on Unreal Engine 5 C++, plugins, Blueprints and live Editor assets through available MCP tools. Use also when a user asks in any language to establish, import or revise an Unreal project's agent workflow, including project rules, optional project-management skills, documentation, task tracking and Editor access.
+description: Develop or debug Unreal Engine 5 C++, plugins, build failures, Blueprints and Sequencer, including live Editor work through MCP. Use also when a user asks in any language to establish, import or revise an Unreal project's agent workflow, including project rules, optional project-management skills, documentation, task tracking and Editor access.
 ---
 
 # Unreal Engine project development
@@ -14,6 +14,7 @@ Infer the workflow from the user's intent. Use their language for conversation, 
 - **Establish or change the project's working agreements.** Follow [Project setup](references/project-setup.md), including for an existing project. Any natural phrasing can trigger it. A request for advice or a preview calls for a read-only response. Configuring a gameplay feature, fixing a bug, or simply opening a new repository does not start onboarding.
 - **Inspect or change something in Unreal Editor.** Follow [Editor and MCP](references/editor-mcp.md). Use the operations the connected project actually exposes. A Blueprint-only request can stay entirely in Blueprint.
 - **Write, debug or review source.** Use the C++ guidance below for relevant code. Preserve the project's C++/Blueprint division, public names, serialized properties and asset references. Identify the migration path for an unavoidable compatibility change.
+- **Diagnose a build or plugin failure.** Follow [Build and plugin diagnostics](references/build-and-debug.md) for target and module discovery, the first failing build stage, or verification of a reflected API change in its existing consumers.
 
 ## Choose the project's management workflow
 
