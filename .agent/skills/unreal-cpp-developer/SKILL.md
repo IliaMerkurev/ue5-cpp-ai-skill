@@ -11,7 +11,7 @@ Read the active instructions for the target repository and affected project/plug
 
 Infer the workflow from the user's intent. Use their language for conversation, setup questions and results. Keep project documents in the team's chosen writing language.
 
-- **Establish or change the project's working agreements.** Follow [Project setup](references/project-setup.md), including for an existing project. During setup ask whether to define additional custom rules now or later. A later request to add one convention updates just that rule. Any natural phrasing can trigger these workflows. A request for advice or a preview calls for a read-only response. Configuring a gameplay feature, fixing a bug, or simply opening a new repository does not start onboarding.
+- **Establish or change the project's working agreements.** Follow [Project setup](references/project-setup.md), including for an existing project. Settle how to maintain the architecture overview and ask whether to define additional custom rules now or later. A later request to revise either choice updates just that part. Any natural phrasing can trigger these workflows. A request for advice or a preview calls for a read-only response. Configuring a gameplay feature, fixing a bug, or simply opening a new repository does not start onboarding.
 - **Inspect or change something in Unreal Editor.** Follow [Editor and MCP](references/editor-mcp.md). Use the operations the connected project actually exposes. A Blueprint-only request can stay entirely in Blueprint.
 - **Write, debug or review source.** Use the C++ guidance below for relevant code. Preserve the project's C++/Blueprint division, public names, serialized properties and asset references. Identify the migration path for an unavoidable compatibility change.
 - **Diagnose a build or plugin failure.** Follow [Build and plugin diagnostics](references/build-and-debug.md) for target and module discovery, the first failing build stage, or verification of a reflected API change in its existing consumers.
@@ -28,7 +28,9 @@ An existing project with no recorded choice can keep its current workflow. For a
 
 ## Project documentation and verification
 
-In any mode, follow the team's documentation language, sources and update policy. Typical homes are `AGENTS.md` for durable working rules, `PROJECT.md` for accepted requirements, and `docs/STATUS.md` for current implementation, evidence and known gaps. Use an architecture note for a decision future contributors need to understand. Create or update records as the agreed workflow requires.
+In any PM mode, follow the team's documentation language, sources and update policy. Typical homes are `AGENTS.md` for durable working rules, `PROJECT.md` for accepted requirements, and `docs/STATUS.md` for current implementation, evidence and known gaps.
+
+**Architecture maintenance.** By default, keep one short overview of the implemented design. Read the relevant section before changing a system boundary. In the same change, update that section if ownership, module or plugin dependencies, public contracts, or important data flows change. For example, moving grab authority from a Pawn Blueprint into a replicated C++ component changes the overview. Tuning grab distance usually does not. Link to representative source or asset paths. Keep proposed designs clearly identified until implemented, and record the rationale for a lasting decision in an ADR if the project uses them. Respect an on-request, deferred or disabled policy recorded during setup.
 
 Use the team's chosen tracker for active tasks when applicable (for example Linear, GitHub Issues or a local plan). Reference existing issues instead of keeping a second board. Selecting a tracker or PM skill alone grants no write access. If an agreed update requires unavailable access, identify that pending update.
 

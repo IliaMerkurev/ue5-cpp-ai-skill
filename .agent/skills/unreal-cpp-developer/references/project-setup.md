@@ -9,7 +9,7 @@ Keep the requested scope. Configuring a camera, fixing an MCP connection, creati
 ## Discover before asking
 
 1. Find the relevant `.uproject` or standalone `.uplugin` and the rules entry point for that scope. In a monorepo, resolve which project the user means before writing. A plugin's rules may apply only beneath its directory. If the project is unavailable, offer a draft or ask for its location. Only report settings as saved after a successful write to that project.
-2. Inspect relevant repository instructions, the skill's `custom_rules.md`, any project-specific skills they reference, and existing PM, documentation and tracker conventions. Distinguish active requirements from template examples. Check the project descriptor, modules, engine association and available engine metadata for facts you need. Keep unresolved facts unknown.
+2. Inspect relevant repository instructions, the skill's `custom_rules.md`, any project-specific skills they reference, and existing PM, documentation and tracker conventions. Look for the current architecture overview, including a README section or a team handbook. Distinguish active requirements from template examples. Check the project descriptor, modules, engine association and available engine metadata for facts you need. Keep unresolved facts unknown.
 3. Identify the user's existing choices from these sources and the conversation. Treat Editor/MCP preferences as durable policy. Actual connectivity, the open project and available tools are session observations. When access is available and within scope, verify them with a read-only query. A plugin descriptor or client configuration alone cannot establish live connectivity.
 4. If earlier custom instructions exist only in a client's private settings, use text the user has supplied. Ask for the relevant excerpt only if needed. Keep personal settings and credentials out of shared project files.
 
@@ -23,6 +23,7 @@ Briefly state what you found, then group only the outstanding decisions into one
 | Editor access | Work through Unreal Editor via MCP when available, or work from source files only? Discover enabled tools through the connection. Introduce a named extension only when its capabilities matter to a concrete need. |
 | Project management | Use this skill's lightweight PM workflow, use a team-selected external skill, or turn automatic PM off? Reuse an existing explicit choice. If the team wants an external skill, identify which one. |
 | Documentation | Which existing document owns requirements? Where should lasting decisions and verified implementation status go, and what changes warrant an update? A small prototype may need only project rules and a short README. |
+| Architecture maintenance | Ask in the user's language, for example “Should I keep the architecture overview up to date as systems change, update it only when asked, or leave it for later?” Offer the existing document or section by name, otherwise propose `docs/ARCHITECTURE.md`. Honor an explicit opt-out. |
 | Task tracking | Does the team use Linear, GitHub Issues, a local list, or no tracker? If an external tracker is chosen, identify the relevant team/project and whether the agent may read, create, or update tasks. Keep one place responsible for task status. |
 
 Choose PM independently of tracker, documentation and Editor access. For an external PM, inspect relevant installed or repository-provided skills and existing pointers. Offer a short list of real matches when helpful. A name, path or description from the user can identify the intended skill. If several match, ask which to use. A skill such as `project-development-manager` is an optional example. Its presence alone does not select it.
@@ -30,6 +31,14 @@ Choose PM independently of tracker, documentation and Editor access. For an exte
 Record the chosen mode and, for an external skill, its exact identifier or a portable link to its file. Resolve Markdown links relative to the document containing them, including in nested plugin directories. Use that workflow for coordination. If it is unavailable, keep the selection, continue feasible engineering work, and surface the missing skill when coordination needs it. Record a fallback only if the team explicitly selects one. On existing projects, a missing PM field is a question for setup or a relevant coordination decision. It does not trigger onboarding during routine work.
 
 Carry forward established engineering conventions such as Blueprint/Sequencer editability, plugin boundaries, validation and branch policy. Ask about additional constraints only when the answers affect this project. If an answer covers only part of the setup, apply the settled choices where useful and keep the others open. An explicit setup request covers writing the agreed project rules. Follow existing authorization separately for enabling/installing plugins, changing client settings, or writing to a tracker.
+
+## Set the architecture policy
+
+Recommend automatic maintenance and apply it when the user asks for defaults. Ask about the policy on first setup or a full review of an older setup when the choice is still open. Reuse an explicit choice on repeat runs. Keep this choice independent of PM, tracker and custom rules. Record the mode in the active project instructions, with the owning document or section when applicable.
+
+With automatic maintenance selected, reuse the existing architecture home. Otherwise start `docs/ARCHITECTURE.md` when there is verified structure to describe. For an established project, capture the initial overview during setup from its descriptors, source and available asset evidence. Describe the main systems, who owns their state or behavior, and the important dependencies or data flows. Keep the overview proportionate and link it from the active project instructions. For an empty project, record the intended path as text and add the link when the overview exists.
+
+For on-request maintenance, create or revise the overview when asked. For a deferred or disabled choice, save the preference and continue setup without creating a stub. Preserve existing architecture records in every mode.
 
 ## Configure custom rules now or later
 
@@ -51,6 +60,7 @@ Include the now-or-later choice on first setup, and on a full setup review of an
   - Use Editor MCP when available. Verify the active project before editing assets.
   - Use the built-in project-management workflow.
   - Maintain requirements in [PROJECT.md](PROJECT.md). Update them when accepted behavior changes.
+  - Keep the architecture overview in the README's Architecture section current when system boundaries change.
   - Track work in Linear. Read access only.
   <!-- unreal-cpp-developer:project-rules:end -->
   ```

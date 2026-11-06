@@ -16,6 +16,8 @@ In Codex projects, `AGENTS.md` normally holds the core working agreements on Edi
 
 Choose **now** to describe your conventions or point to an existing team guide. The assistant records agreed additions in a project-owned `custom_rules.md` by default, reuses existing rules in their original scope, and links to them from the active project instructions. Choose **later** to finish setup without creating an empty file. You can add rules in a future session by asking in your own words. Project documents can have a different language from the conversation.
 
+Setup also asks how to maintain the architecture overview. By default, the agent updates it in the same change when responsibility moves between systems, module dependencies change, or data flows through a new interface. It uses the team's existing document or README section, or starts `docs/ARCHITECTURE.md` once there is an implemented design to describe. You can choose updates only on request, defer the decision, or turn maintenance off. This applies independently of your project-management choice.
+
 ### Choose how to manage work
 
 | Project preference | What the assistant does |
