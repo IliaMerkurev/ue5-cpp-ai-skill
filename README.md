@@ -12,7 +12,9 @@ Install the skill in your assistant and open the Unreal project. Use your own wo
 
 These are examples. The assistant recognizes the intent across languages and responds in the language you use. To explore the options first, just ask for an explanation. To revise one choice later, say what changed, for example “We've moved our tasks to Linear.”
 
-On setup, the assistant reads existing project and plugin rules. It asks about unresolved choices such as Editor access, project management, where documentation belongs and which tracker the team uses. It records the answers in the project's existing instructions or a scoped `AGENTS.md`. Project documents can have a different language from the conversation. Future requests use these rules directly. Repeating setup preserves manual edits and applies new decisions.
+In Codex projects, `AGENTS.md` normally holds the core working agreements on Editor access, project management, documentation and task tracking. During setup, the assistant also asks **“Would you like to set up custom project rules now or later?”** in your language. These can cover folder structure, C++ conventions, asset naming or anything else you want the assistant to follow. [How Codex reads project instructions](https://developers.openai.com/codex/guides/agents-md)
+
+Choose **now** to describe your conventions or point to an existing team guide. The assistant records agreed additions in a project-owned `custom_rules.md` by default, reuses existing rules in their original scope, and links to them from the active project instructions. Choose **later** to finish setup without creating an empty file. You can add rules in a future session by asking in your own words. Project documents can have a different language from the conversation.
 
 ### Choose how to manage work
 

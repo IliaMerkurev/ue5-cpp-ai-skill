@@ -7,11 +7,11 @@ description: Develop or debug Unreal Engine 5 C++, plugins, build failures, Blue
 
 ## Project context and scope
 
-Read the instructions for the target repository and affected project/plugin, including existing [custom rules](custom_rules.md). Apply explicit user instructions and scoped project conventions before the defaults here. Identify the relevant `.uproject` or `.uplugin` and the engine version. Check installed engine headers or version-matched documentation when API or lifecycle behavior is uncertain.
+Read the active instructions for the target repository and affected project/plugin. Follow their pointer to the project's custom conventions and respect any [legacy overrides](custom_rules.md) in their original scope. Apply explicit user instructions and scoped project conventions before the defaults here. Identify the relevant `.uproject` or `.uplugin` and the engine version. Check installed engine headers or version-matched documentation when API or lifecycle behavior is uncertain.
 
 Infer the workflow from the user's intent. Use their language for conversation, setup questions and results. Keep project documents in the team's chosen writing language.
 
-- **Establish or change the project's working agreements.** Follow [Project setup](references/project-setup.md), including for an existing project. Any natural phrasing can trigger it. A request for advice or a preview calls for a read-only response. Configuring a gameplay feature, fixing a bug, or simply opening a new repository does not start onboarding.
+- **Establish or change the project's working agreements.** Follow [Project setup](references/project-setup.md), including for an existing project. During setup ask whether to define additional custom rules now or later. A later request to add one convention updates just that rule. Any natural phrasing can trigger these workflows. A request for advice or a preview calls for a read-only response. Configuring a gameplay feature, fixing a bug, or simply opening a new repository does not start onboarding.
 - **Inspect or change something in Unreal Editor.** Follow [Editor and MCP](references/editor-mcp.md). Use the operations the connected project actually exposes. A Blueprint-only request can stay entirely in Blueprint.
 - **Write, debug or review source.** Use the C++ guidance below for relevant code. Preserve the project's C++/Blueprint division, public names, serialized properties and asset references. Identify the migration path for an unavoidable compatibility change.
 - **Diagnose a build or plugin failure.** Follow [Build and plugin diagnostics](references/build-and-debug.md) for target and module discovery, the first failing build stage, or verification of a reflected API change in its existing consumers.

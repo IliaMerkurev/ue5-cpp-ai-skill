@@ -19,6 +19,7 @@ Briefly state what you found, then group only the outstanding decisions into one
 
 | Decision | What to settle if still open |
 | --- | --- |
+| Additional project rules | Ask in the user's language. For example, “Would you like to set up `custom_rules.md` now or later? It can cover folder structure, coding conventions, asset naming, or anything else you want the agent to follow.” Use the actual filename if the team already has a guide. |
 | Editor access | Work through Unreal Editor via MCP when available, or work from source files only? Discover enabled tools through the connection. Introduce a named extension only when its capabilities matter to a concrete need. |
 | Project management | Use this skill's lightweight PM workflow, use a team-selected external skill, or turn automatic PM off? Reuse an existing explicit choice. If the team wants an external skill, identify which one. |
 | Documentation | Which existing document owns requirements? Where should lasting decisions and verified implementation status go, and what changes warrant an update? A small prototype may need only project rules and a short README. |
@@ -30,9 +31,17 @@ Record the chosen mode and, for an external skill, its exact identifier or a por
 
 Carry forward established engineering conventions such as Blueprint/Sequencer editability, plugin boundaries, validation and branch policy. Ask about additional constraints only when the answers affect this project. If an answer covers only part of the setup, apply the settled choices where useful and keep the others open. An explicit setup request covers writing the agreed project rules. Follow existing authorization separately for enabling/installing plugins, changing client settings, or writing to a tracker.
 
+## Configure custom rules now or later
+
+Include the now-or-later choice on first setup, and on a full setup review of an older project if the team has never answered it. If active custom rules already exist, name their file and ask whether to **extend those rules now or later**. Reuse explicit answers from the conversation. If the user has already asked you to save specific conventions, proceed with “now”.
+
+- **Now.** Invite the user to describe their conventions in their own words. If they already supplied them, record them directly. Ask narrowly about missing details that change a rule's meaning or scope. Folder layout, C++ style, Blueprint authoring, asset prefixes and team workflows are prompts for discussion. Save only agreed rules and link existing authoritative guides for topics they already cover. An investigation or a proposal can stay in chat until the team adopts it.
+- **Later.** Finish the rest of setup and note the deferral in the working agreements. Leave existing custom rules active. Create no empty custom file or link to a future file. Do not repeat the question on routine tasks or reruns once answered. A later request such as “From now on, put our widget Blueprints in this folder” can add a rule without restarting setup.
+
 ## Persist and reconcile
 
-- Use the repository's authoritative project instructions. If there is no existing entry point, create `AGENTS.md` at the project root. If existing docs already own a convention, link to that document. A plugin's authoring contract belongs at plugin scope. Keep one authoritative copy of each rule.
+- Keep core working agreements (Editor access, PM, documentation and tracker) in the project's active instructions, normally `AGENTS.md` for Codex. Write additional confirmed conventions to the project's existing custom-rules file, or create `custom_rules.md` alongside the project's `AGENTS.md` when there is a rule to save. Respect narrower plugin scope and explicit team paths. The installed skill's copy is not the destination for new project rules.
+- From the active project instructions, add or reuse one instruction to read and follow the custom file. Resolve its link relative to the containing document. Keep the rule text in its authoritative location. Replace a previous deferral note once custom rules are configured. On repeat setup, check the pointer and preserve manual edits, other tools' sections and existing scoped rules.
 - Preserve the supplied skill and legacy overrides during setup. A repository-owned `custom_rules.md` with active rules can remain authoritative and be linked. If its only copy is in a replaceable skill installation or private client settings, migrate the agreed, shareable rules into a project-owned location when the user wants them there. Carry over their original scope. Retire duplicates only as part of an agreed migration. Never import a blank template as project policy.
 - For new Markdown content, use the two markers below around **only the section maintained by this workflow**. Keep them unchanged across languages. Write the contents in the agreed language. Add confirmed decisions, short relative links and any necessary scope. Create additional documents only when they have content the project needs.
 
