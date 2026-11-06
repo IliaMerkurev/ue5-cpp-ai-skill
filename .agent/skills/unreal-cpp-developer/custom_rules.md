@@ -1,16 +1,17 @@
-# Project-Specific Custom Rules
+# Project-specific rules
 
-This file is intended for developers to add their own team or project-specific AI coding rules that override or extend the base Unreal Engine 5 C++ Development skill.
+Read this file before changing code. Add concrete project requirements here; they override the generic skill where applicable. Explicit user instructions and repository engineering instructions remain authoritative.
 
-## How to use this file
-1. Add any specific naming conventions, architectural preferences, or formatting rules your project requires below.
-2. The AI assistant will read these rules and prioritize them over the general `SKILL.md` guidelines if there is a conflict.
+No project-specific rules are enabled in this distributed file. Keep product-specific conventions out of the shared Unreal skill.
 
----
+Useful topics for your own rules include:
 
-### Custom Rules
+- Required authoring access through Details, Blueprint, and Sequencer.
+- Public naming, compatibility, and serialization requirements.
+- Component autonomy, allowed dependencies, and module boundaries.
+- Project-specific logging, formatting, and lifecycle contracts.
+- Permitted validation commands and release/versioning conventions.
 
-*(Add your rules here. For example:)*
-*- "Always prefix our project's UI classes with `MyProj`."*
-*- "We use a proprietary logging macro `PROJ_LOG` instead of `UE_LOG`."*
-*- "All newly generated Actors must inherit from `AMyProjectBaseActor`."*
+State requirements directly. Examples are not automatically requirements. Prefer referencing an existing authoritative project document over maintaining competing copies.
+
+The base skill permits only Editor tooltip comments in final generated code. Instructional comments inside the supplied templates are guidance for the agent and must not be copied into final implementations.

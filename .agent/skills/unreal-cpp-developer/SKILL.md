@@ -1,479 +1,138 @@
 ---
-name: unreal cpp developer
-description: Instructions and architectural standards for Unreal Engine 5 C++ development
+name: unreal-cpp-developer
+description: Write, review, and refactor Unreal Engine 5 C++ Actors, Components, UObjects, gameplay systems, plugins, and Blueprint-facing APIs with appropriate ownership, lifecycle, and module boundaries.
 ---
 
-# Unreal Engine 5 C++ Modern Development
+# Unreal Engine 5 C++ development
 
-This skill defines strict development standards for Unreal Engine 5 C++ code.
-The goal is to enforce high-quality, performant Unreal Engine code that follows official recommendations.
+## Project context and scope
 
-## When to Use
+Before changing code, read the repository's engineering instructions and [custom_rules.md](custom_rules.md). Explicit user instructions and project requirements take precedence over these generic defaults. Use the project's engine version and inspect installed engine headers when reflection, compiler, or lifecycle behavior is uncertain.
 
-Use this skill when:
-- Writing C++ code for Unreal Engine 5.x
-- Developing gameplay systems
-- Writing Actors, Components, or Subsystems
-- Exposing APIs to Blueprint
-- Optimizing performance
-- Building reusable engine systems
+Apply this skill to Unreal C++ and its Blueprint integration. Do not use it to impose an architecture on unrelated engines or Blueprint-only work. Preserve the project's chosen C++/Blueprint division; C++ is appropriate for reusable logic and performance-sensitive work, while Blueprint remains a first-class authoring and integration surface.
 
-Do NOT use when:
-- Working with Blueprint-only logic
-- Writing non-Unreal code
-- Working in other engines
+Preserve public names, serialized properties, and existing Blueprint assets. Prefer compatible wrappers or deprecation paths for API corrections. Identify unavoidable behavior changes and migration steps.
 
----
+## Comments and templates
 
-# Custom Project Rules
+**Do not add explanatory comments to generated implementation code.** No inline logic comments, function-body comments, section banners, or comments on internal variables. Express intent through clear names, small functions, and explicit control flow. Explain algorithms, invariants, tradeoffs, and engine workarounds in external documentation or the change description.
 
-Before generating or modifying any code, you **MUST** first check for project-specific rules in `custom_rules.md` within this skill directory.
-If `custom_rules.md` exists, its rules override and take priority over any rule in this file.
+The only comments to generate in final code are useful `/** ... */` tooltips for `UPROPERTY` and `UFUNCTION` declarations. Describe units, coordinate spaces, valid ranges, side effects, and parameters where relevant. Do not invent copyright notices; preserve genuine existing legal notices. Do not perform an unrelated repository-wide comment cleanup.
 
----
+The [header](templates/TemplateClass.h) and [source](templates/TemplateClass.cpp) templates intentionally contain instructional comments for the agent. Keep those comments in the template files, but remove instructional placeholders when producing final code; retain only completed tooltips.
 
-# Class Templates
+Read the templates when creating a new class. They demonstrate a minimal `UObject`, not a mandatory base for Actors, Components, Subsystems, or Slate types. Select the correct base and lifecycle, adapt the structure, and replace `TEMPLATE_CLASS_NAME`, `YOURMODULE_API`, categories, example members, and placeholder descriptions. Rename files and the generated-header include consistently.
 
-When asked to generate a **NEW** C++ class from scratch, you **must** use the provided templates as your starting point:
-- Header Template: `templates/TemplateClass.h`
-- Source Template: `templates/TemplateClass.cpp`
+## Reflection and authoring access
 
-**Never** invent a new class structure if templates are provided. Always start from the templates.
-Substitute `TEMPLATE_CLASS_NAME` and `YOURMODULE_API` with the appropriate names.
+Choose property exposure from the authoring workflow rather than a blanket minimal-access rule:
 
----
-
-# Core Philosophy
-
-## C++ First Architecture
-
-Core gameplay logic should be implemented in C++ whenever possible.
-
-Blueprints should mainly be used for:
-- configuration and asset references
-- UI layout and animation (UMG)
-- simple event wiring and visual effects
-
-**Avoid implementing complex state machines, heavy math, or core gameplay loops purely in Blueprints.**
-
----
-
-# Modern Unreal Code Structure
-
-## Include What You Use (IWYU) & Headers
-
-Always follow the IWYU principle to optimize compile times.
-- Never include unnecessary headers.
-- Use forward declarations for classes and structs in headers whenever possible.
+- `EditAnywhere` and `EditDefaultsOnly` control Details editability; `BlueprintReadWrite` and `BlueprintReadOnly` control Blueprint access. Preserve broad editability where the project requires it.
+- `Interp` is a **UPROPERTY specifier**, not metadata. Supported Sequencer tracks still depend on property type and engine integration.
+- Keep caches, timers, physical indices, and other implementation state separate from user configuration. Expose deliberate queries where needed.
+- Direct Blueprint or Sequencer property writes need not call setters or `PostEditChangeProperty`. Handle supported changes through appropriate invalidation, existing active updates, explicit refresh hooks, or inexpensive bounded synchronization. Do not make settings read-only to avoid this work.
 
 ```cpp
-#pragma once
-#include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
-#include "MyComponent.generated.h"
-
-class UHealthComponent; // Forward Declaration
+/** Angular speed in degrees per second. */
+UPROPERTY(EditAnywhere, BlueprintReadWrite, Interp, Category = "Animation")
+float AngularSpeed = 90.0f;
 ```
 
-## Class Layout
+Use `BlueprintCallable` for commands and functions that need execution flow. Use `BlueprintPure` for side-effect-free queries, remembering they may be evaluated repeatedly. Mark C++ getters `const` where appropriate; constness alone does not make a query cheap.
 
-Classes must be organized by access level and functionality.
+Use `BlueprintImplementableEvent` when Blueprint supplies the implementation and `BlueprintNativeEvent` when C++ provides a default through `_Implementation`. Use delegates for subscriptions, with an explicit owner and cleanup. These are distinct mechanisms.
+
+Static Blueprint functions that need a world should accept a suitable context object and use `meta = (WorldContext = "WorldContextObject")`. Handle missing contexts and multiple worlds; avoid global-world assumptions. Pure math helpers do not need a world context.
+
+## Ownership and asset loading
+
+| Need | Usual choice |
+| --- | --- |
+| Strong UObject member participating in GC | `UPROPERTY()` with `TObjectPtr<T>` in a reachable reflected owner |
+| Observation without keeping a UObject alive | `TWeakObjectPtr<T>`, revalidated before use |
+| Asset/class reference with deferred loading | `TSoftObjectPtr<T>` / `TSoftClassPtr<T>` |
+| Required immediate class reference | `TSubclassOf<T>` |
+| Non-owning local access or function parameter | Raw pointer or reference with a valid lifetime |
+
+`TObjectPtr` alone in an unreflected structure is not a GC root. Choose explicit GC participation for non-UObject owners when necessary; do not assume a pointer wrapper makes an object reachable.
+
+Hard references are appropriate for required assets and immediate use. Soft references are appropriate when deferred loading or avoiding a dependency chain matters; handle loading, failure, cancellation, and lifetime after loading. For substantial asynchronous asset loading, use the project's Asset Manager or streamable loading facilities.
+
+Prefer configurable asset references over brittle hardcoded game-content paths. Do not automatically replace existing references or introduce asynchronous loading without a workflow need.
+
+Use Unreal allocation/lifetime APIs for UObjects and actors rather than `new`/`delete`. Unreal shared pointers manage non-UObject data; they are not a substitute for UObject GC.
+
+## Lifecycle, callbacks, and asynchronous work
+
+Constructors establish defaults and default subobjects. World-dependent work belongs in appropriate lifecycle hooks. Registration can repeat in the editor: make setup idempotent and pair subscriptions/resources with cleanup. Use `OnRegister`, `InitializeComponent`, `PostInitializeComponents`, and `BeginPlay` according to the actual object's lifecycle.
+
+Clear timers and detach subscriptions on cancellation, replacement, EndPlay, or destruction as applicable. Remove only bindings owned by the operation. Async action proxies should register only while they own an active operation and become ready for destruction when it ends.
+
+Treat delegates, Blueprint events, actor spawning, and overlap callbacks as reentrant. Commit internal state before dispatch; revalidate object lifetime, operation identity, and relevant indices afterward. Do not retain container references across callbacks. Stable operation IDs or revisions can invalidate delayed work without confusing identity with a mutable array position.
+
+A completion handler may start a replacement operation. Finish the old operation before calling the handler, and do not subsequently disable or clear the replacement.
+
+Gameplay actor and component operations normally run on the game thread. Worker tasks may process isolated data or APIs explicitly documented as thread-safe. Do not describe every UObject operation or GC implementation as single-threaded. Returning to the game thread does not restore a destroyed object's lifetime: use appropriate weak references or explicit ownership, and reject stale results. Avoid unguarded raw `this` captures in delayed work.
+
+## Tick and performance
+
+`bCanEverTick` declares capability. Set it to false only when no Tick is needed. For objects that may tick later, enable capability and use `bStartWithTickEnabled = false` plus runtime activation (`SetComponentTickEnabled` or the Actor equivalent). Disable Tick when its work is inactive.
+
+Continuous visual animation may need per-frame updates. Choose `TickInterval` from the required responsiveness; do not impose a generic 0.1-second interval. Prefer events for discrete changes. Timers also have overhead and cleanup costs; replacing Tick with many independent timers is not automatically an optimization.
+
+Avoid repeated component searches, curve evaluation, allocations, and redundant transform updates when a localized change preserves behavior. Cache references or derived data only with a clear invalidation policy for runtime edits, replacement, and destruction.
+
+Use `Reserve` when an expected collection size is useful. `TInlineComponentArray` can avoid heap allocations for counts that fit its inline capacity; it can still spill to the heap. Do not prohibit every cast or lookup in a loop without considering its cost and frequency.
+
+Distinguish source-supported simplification from measured performance. Rendering changes can affect bounds, collision, and culling; fewer updates are not a success if visible behavior changes. Preserve coordinate-space and timing contracts, and defer changes requiring profiling or visual validation when that evidence is unavailable.
+
+## Runtime safety and math
+
+Use `IsValid` for UObject lifetime checks where appropriate. A validation check is not ownership and cannot make later asynchronous access safe.
+
+`ensure` is non-fatal: its expression is evaluated in Shipping, while reporting depends on configuration. It does not replace control flow:
 
 ```cpp
-UCLASS()
-class MYMODULE_API UMyComponent : public UActorComponent
+if (!ensure(IsValid(Target)))
 {
-    GENERATED_BODY()
-public:
-    UMyComponent();
-    virtual void TickComponent(...) override; // 1. Virtuals
-    void Heal(float Amount); // 2. Public API
-protected:
-    virtual void BeginPlay() override; // 3. Protected Lifecycle
-private:
-    void UpdateState(); // 4. Internal Logic
-
-    UPROPERTY(VisibleAnywhere, Category = "Health")
-    TObjectPtr<UHealthComponent> HealthComponent; // 5. UProperties
-
-    int32 InternalCounter = 0; // 6. Native Variables
-};
-```
-
----
-
-# Modern UE5 C++ & Memory
-
-## UObjects & Garbage Collection
-
-Always track UObject references dynamically allocated or exposed to the editor.
-
-Preferred pointer types:
-- `TObjectPtr<T>`: For class members pointing to UObjects (replaces raw pointers in UE5).
-- `TWeakObjectPtr<T>`: To observe UObjects without preventing garbage collection.
-- `TSoftObjectPtr<T>`: For lazy-loading asynchronous assets.
-
-**Never store unmanaged raw `UObject*` as class members without `UPROPERTY()`.**
-
-## Standard C++ vs Unreal Types
-
-- **Standard Containers**: Avoid using `std::` containers (`std::vector`, `std::string`) in gameplay code. Always prefer Unreal equivalents (`TArray`, `TMap`, `FString`). `std::` is only acceptable in standalone editor tools or isolated third-party wrappers.
-- **No C++ Exceptions**: Unreal builds with exceptions disabled. Do not use `try/catch`.
-- **Auto keyword**: Only use `auto` when the type is strictly obvious from the right side of the assignment, or for complex iterator types. Do not use it blindly.
-
-## Const Correctness
-
-Use `const` extensively.
-- Pass parameters by `const Type&` when not modifying them.
-- Mark getter functions as `const`.
-- Use `const` pointers when the pointed-to object shouldn't be modified.
-
----
-
-# Performance Guidelines
-
-## Tick
-
-Tick **must** be disabled by default in constructors:
-```cpp
-PrimaryActorTick.bCanEverTick = false;
-PrimaryComponentTick.bCanEverTick = false;
-```
-Only enable Tick for continuous visual updates, interpolation, or custom physics. 
-For logic state checks, use **Timers** or **Delegates**. If Tick is required, reduce frequency (`TickInterval = 0.1f`).
-
-## Casting & Component Lookup
-
-- **Avoid casting inside loops or Tick.**
-- **Avoid string-based or class-based lookups (`FindComponentByClass`) in loops or Tick.**
-- When you need to retrieve multiple components without allocating heap memory, use `TInlineComponentArray`:
-
-```cpp
-TInlineComponentArray<UPrimitiveComponent*> PrimitiveComponents(TargetActor);
-for (UPrimitiveComponent* PrimComp : PrimitiveComponents) { ... }
-```
-
-Cache essential component references during initialization:
-
-```cpp
-void AMyActor::PostInitializeComponents()
-{
-    Super::PostInitializeComponents();
-
-    HealthComponent = FindComponentByClass<UHealthComponent>();
-    check(HealthComponent);
+    return;
 }
 ```
 
-## Array Memory Preallocation
+`check`/`checkf` generally stop execution on failure when enabled and are normally disabled in Shipping unless configured otherwise. Do not put required side effects in assertions. Use ordinary branches for recoverable input or runtime failures.
 
-When populating arrays/maps and the final size is known (or roughly known), **always** use `Reserve()` to avoid hidden memory allocations.
+Editor clamp metadata does not validate arbitrary C++/Blueprint writes. Guard divisors, non-finite values, invalid durations, and capacity arithmetic. State Local/World spaces in APIs and tooltips; account for transformed parents and Unreal transform composition order.
 
-```cpp
-TArray<AActor*> ValidActors;
-ValidActors.Reserve(SourceActors.Num());
-```
+## Architecture and modules
 
----
+Keep reusable plugins independent of game-project modules. Separate runtime code from editor/compiler dependencies. Declare `Build.cs` dependencies as public when required by public headers and private otherwise; forward declarations do not eliminate actual module dependencies.
 
-# Assertions & Validation
+Use interfaces for shared behavior across unrelated types and delegates for notifications. When an interface supports Blueprint implementations, use the generated `Execute_` entry points rather than assuming a native interface pointer exists. Direct calls or casts are reasonable for intentional, concrete dependencies.
 
-Fail fast during development. Use Unreal's assertion macros.
+Use Data Assets for reusable definitions or shared configuration; retain per-instance properties for instance-specific settings. Use `UPrimaryDataAsset` when primary-asset management is needed. Use Gameplay Tags for extensible hierarchical categories, not as an automatic replacement for every enum or boolean.
 
-- `check(Condition)`: Halts execution if false (stripped in Shipping).
-- `checkf(Condition, TEXT("Message"))`: Halts with formatted log.
-- `ensure(Condition)`: Logs a callstack the first time it fails, but continues execution.
-- `ensureAlways(Condition)`: Like ensure, but logs every time it fails.
+Choose a GameInstance, World, or LocalPlayer Subsystem when a service genuinely needs that lifetime. Do not introduce global managers or a framework into autonomous components merely to follow a pattern.
 
-**Pointer Validation:**
-```cpp
-if (IsValid(TargetActor)) // preferred for Actors/UObjects (checks PendingKill)
-{ ... }
-```
+For new player-input work, prefer Enhanced Input when supported by the target project. Preserve existing integrations unless migration is requested or required; do not add input dependencies to unrelated modules.
 
----
+## Unreal types, style, and diagnostics
 
-# Strings & Text
+Prefer Unreal containers and strings in engine-facing code. Standard-library types remain appropriate at supported third-party or isolated boundaries. Respect module compiler settings; do not introduce C++ exceptions into modules built without them.
 
-Understand the difference between Unreal string types:
-- **`FName`**: Fast, lightweight, immutable string used for IDs, tags, and map lookups. **Never use `FString` as a key in a `TMap`; always use `FName`.**
-- **`FText`**: Localizable text. Used for all UI and player-facing text.
-- **`FString`**: Mutable string for general manipulation and logging. Heavy.
+- `FText`: localized user-facing text.
+- `FName`: identifier semantics, including its case-insensitive comparisons.
+- `FString`: mutable text and string keys when their string/case semantics are required. Do not intern arbitrary unbounded input solely to replace a string key.
 
----
+Use values for small scalar parameters and `const&` for appropriate larger read-only inputs, subject to reflection requirements. Use `auto` when it improves readability without hiding a meaningful type.
 
-# Asset References
+Follow Unreal prefixes (`U`, `A`, `F`, `E`, `I`, `T`, `S`, `b`) and existing project layout. Prefer scoped enums; choose underlying types to match reflection, flags, and API requirements rather than forcing every enum into `uint8`.
 
-Avoid unnecessary hard references that cause chain-loading.
+Follow IWYU, use forward declarations where sufficient, and keep `.generated.h` last among header includes. Use braces for all control flow. Expose user tuning through properties/assets and give internal constants meaningful names. Apply the project's formatting configuration without reformatting unrelated files.
 
-**Bad** (Loads `AWeapon` into memory as soon as this class loads):
-```cpp
-UPROPERTY(EditDefaultsOnly)
-TSubclassOf<AWeapon> WeaponClass;
-```
+Use dedicated log categories and actionable messages. Avoid unconditional per-frame log spam; use verbosity, gating, or rate limiting. Consider Visual Logger for spatial or time-dependent debugging when useful and authorized.
 
-**Good** (Loads only when explicitly requested):
-```cpp
-UPROPERTY(EditDefaultsOnly)
-TSoftClassPtr<AWeapon> WeaponClass;
-```
+## Review and validation
 
-**Asynchronous Loading:**
-For heavy assets, use the `FStreamableManager` from `UAssetManager` to load `TSoftObjectPtr` or `TSoftClassPtr` asynchronously, preventing hitches/freezing on the main thread.
+Before delivery, review reflection declarations, ownership, callback cleanup, mutable settings, public compatibility, coordinate spaces, and module boundaries. Confirm the final code follows the tooltip-only comment policy; template guidance must not leak into generated code.
 
-## Hardcoded Paths
-**Avoid** hardcoding asset paths in gameplay systems using `ConstructorHelpers::FObjectFinder` (e.g., `TEXT("/Game/P_Explosion")`). 
-This is brittle and forces synchronous loading. Expose `UPROPERTY(EditDefaultsOnly)` on the class and assign the asset in Blueprint. Exception: Hardcoded paths are acceptable for core UI or developer tools.
-
----
-
-# Interfaces & Subsystems
-
-Use modern Epic paradigms for architecture decoupling.
-
-## Interfaces & Loose Coupling
-Avoid direct `Cast<T>` to specific classes for gameplay events. Hardcasting creates rigid dependencies and forces headers to be included across modules. 
-Instead, use `UINTERFACE` to decouple systems.
-
-```cpp
-if (TargetActor->Implements<UInteractable>())
-{
-    IInteractable::Execute_OnInteract(TargetActor, Instigator);
-}
-```
-
-**Rule of thumb for Interfaces:**
-- Create interfaces based on **shared behavior** (e.g., `IDamageable`, `IInteractable`), not specific objects.
-- Do not create hyper-specific micro-interfaces (`IDoorInterface`, `IChestInterface`).
-- First check if an existing engine interface (like `IGameplayTaskOwnerInterface`) or `GameplayTags` can solve the problem before creating a new `UINTERFACE`.
-
-## Subsystems
-Use `UGameInstanceSubsystem`, `UWorldSubsystem`, or `ULocalPlayerSubsystem` for global managers instead of Singletons or massive Managers on the GameMode.
-
-## Data-Driven Architecture (Data Assets)
-Avoid hardcoding parameters or configurations purely into `UPROPERTY()` instance variables on Actors if those values describe a "type" or "definition" of an object (like Weapon stats, Character stats, Item data).
-Instead, move those definitions into a `UPrimaryDataAsset` or `UDataAsset`.
-
-```cpp
-// GOOD: Data-Driven paradigm
-UPROPERTY(EditDefaultsOnly, Category = "Config")
-TObjectPtr<UWeaponDataAsset> WeaponConfig;
-```
-
-**Gameplay Tags:** Prefer `GameplayTags` over hardcoded enums or booleans when defining gameplay categories, states, or events.
-
-## Static Functions & GetWorld()
-Do not rely on implicit `GetWorld()` access within generic utility classes. 
-When creating Blueprint macro libraries or static C++ helper functions, always ask for a `const UObject* WorldContextObject` to accurately trace the execution context.
-
-```cpp
-UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
-static void SpawnCustomEffect(const UObject* WorldContextObject);
-```
-
----
-
-# Logging & Debugging
-
-Define custom log categories for systems.
-
-```cpp
-DEFINE_LOG_CATEGORY_STATIC(LogInventory, Log, All);
-UE_LOG(LogInventory, Warning, TEXT("Inventory is full for %s!"), *GetName());
-```
-
-Use **Visual Logger** (`UE_VLOG`) for spatial, timeline-based debugging of AI and gameplay systems.
-
-**Avoid excessive logging** in `Tick` or tight loops. Logging should never execute every frame unless protected by a flag.
-
----
-
-# Delegates & Cleanup
-
-Always remove delegates when objects are destroyed.
-
-```cpp
-void UMyComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-    Super::EndPlay(EndPlayReason);
-    
-    SomeDelegate.RemoveAll(this);
-}
-```
-
-This prevents fatal crashes during shutdown or map transitions.
-
----
-
-# Blueprint API & Event Handling
-
-Expose Blueprint APIs intentionally and safely.
-- `BlueprintCallable`: For functions that change state.
-- `BlueprintPure`: For getter functions that do NOT modify state. Add `const`.
-- `BlueprintReadOnly`: For properties that BP can read but only C++ should change.
-
-## Enhanced Input System
-UE5 utilizes the Enhanced Input System. **Never** use deprecated `Action/Axis Mappings` or `UPlayerInputComponent::BindAction`.
-Always use `UEnhancedInputComponent` and `UInputAction` / `UInputMappingContext`.
-
-```cpp
-if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-{
-    EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
-}
-```
-
-## Event Handling
-When C++ needs to trigger logic that *might* be implemented in Blueprint, use:
-- `BlueprintImplementableEvent`: C++ calls it, BP implements it. (No native C++ body).
-- `BlueprintNativeEvent`: C++ provides a default implementation (via `*_Implementation()`), BP can override it.
-
-Avoid exposing too much internal implementation detail.
-
----
-
-# Constructor & Lifecycle Rules
-
-**Do not execute heavy logic in constructors.**
-Constructors must only be used for:
-- Initializing default variables.
-- Creating default subobjects (`CreateDefaultSubobject<T>`).
-
-For object initialization and runtime logic, use the appropriate lifecycle hooks:
-- **Actors**: `PostInitializeComponents()`, `BeginPlay()`.
-- **Components**: `InitializeComponent()`, `OnRegister()`, `BeginPlay()`.
-
-```cpp
-// Constructor: Setup only
-UMyComponent::UMyComponent()
-{
-    PrimaryComponentTick.bCanEverTick = false;
-}
-
-// Runtime logic
-void UMyComponent::BeginPlay()
-{
-    Super::BeginPlay();
-    // Cache references and start logic here
-}
-```
-
----
-
-# Strict Module Isolation (Plugin-First)
-
-All dependencies on other modules must be minimized.
-- **Never** include headers from project game modules inside the plugin. (The plugin must not know about the game).
-- Use **Interfaces** and **Delegates** to communicate outwards.
-- Use **Forward Declarations** wherever possible instead of `#include`ing headers from other plugin modules.
-
----
-
-# Unreal Naming Conventions
-
-Follow Epic Games naming standards rigidly:
-
-| Type | Prefix | Example |
-| ---- | ------ | ------- |
-| **Template** | `T` | `TArray` |
-| **UObject** | `U` | `UHealthComponent` |
-| **Actor** | `A` | `AWeapon` |
-| **Struct** | `F` | `FVector` |
-| **Enum** | `E` | `EEndPlayReason` |
-| **Interface** | `I` | `IInteractable` |
-| **Slate Widget** | `S` | `SButton` |
-| **Boolean** | `b` | `bIsInitialized` |
-
----
-
-# Multi-threading & Async Safety
-
-**Never access, modify, or spawn `UObject`s or `AActor`s outside the Game Thread.**
-Unreal Engine's Garbage Collector and UObject systems are strictly single-threaded.
-
-- Always verify the current thread before complex UObject operations: `check(IsInGameThread());`
-- Use `AsyncTask`, `FRunnable`, or `ParallelFor` strictly for abstract mathematical computations, data processing, or backend logic.
-- When an async thread finishes, dispatch the result back to the Game Thread to update the game state safely:
-
-```cpp
-AsyncTask(ENamedThreads::GameThread, [this]()
-{
-    // Safe to modify UObjects here
-});
-```
-
----
-
-# General Coding Style & Formatting
-
-- **No Magic Numbers**: Never embed gameplay tuning values directly in code. Expose them via `UPROPERTY` or `UDataAsset`. For pure math constants, extract them to `constexpr` or `const` variables with meaningful names.
-- **Braces**: Always use braces `{}` for control flow (`if`, `for`, `while`), even for single lines, to prevent macro expansion issues and maintain clean visual structure.
-- **Enums**: Always prefer `enum class EnumName : uint8`. Use `TEnumAsByte<EEnumName>` **only** when interfacing with legacy APIs, specific unmanaged arrays for memory, or older serialization formats.
-
-## Code Formatting
-
-- **Unreal Engine C++ Style Guide**: All code must strictly follow the official Epic Games coding standards (indentation, naming, bracket placement).
-- **clang-format**: Automate style enforcement using `.clang-format` based on the official Unreal Style.
-- Format code locally in the IDE (Visual Studio, Rider, VSCode) before every commit.
-- **Limit line length**: Keep horizontal columns readable (typically max 120 characters) and break logic vertically to aid Code Review parsing.
-
----
-
-# Comments & Documentation
-
-In the body of functions and methods, **DO NOT write comments**. The code must be entirely self-documenting.
-
-**Mandatory comments** are allowed *only* for `UPROPERTY` and `UFUNCTION` declarations using Javadoc format (`/** ... */`) for Editor tooltips. No inline logic comments. No variable comments.
-
-```cpp
-// BAD: Inline comment explaining logic
-float Health = 100.f; // The starting health
-
-// GOOD: Editor-facing Tooltip
-/** The maximum health value this character can have. */
-UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-float MaxHealth;
-```
-
----
-
-# Code Generation Checklist
-
-Before generating or modifying code, verify:
-- [ ] Uses IWYU and Forward Declarations.
-- [ ] Logic stays out of constructors (deferred to `BeginPlay`/`InitializeComponent`).
-- [ ] Strict Module Isolation (Plugin doesn't depend on Game logic).
-- [ ] Tick disabled unless absolutely required.
-- [ ] Code avoids heavy logic or operations in `Tick`.
-- [ ] Safe pointer usage (`TObjectPtr`, `UPROPERTY()`).
-- [ ] Validation macros (`check`, `ensure`, `IsValid`) used appropriately.
-- [ ] `const` correctness applied to types and methods.
-- [ ] Enums use `enum class` and `ENUM_CLASS_FLAGS` for bitmasks.
-- [ ] Soft references used for assets with `FStreamableManager` for async loading.
-- [ ] Asset references exposed through `UPROPERTY` instead of hardcoded paths.
-- [ ] Memory preallocated (`Reserve`) where possible for `TArray`/`TMap`/`TSet`.
-- [ ] Subsystems and Interfaces used to decouple logic (Gameplay logic separated from presentation logic).
-- [ ] Blueprint APIs safely and minimally exposed.
-- [ ] BP Events explicitly use `BlueprintImplementableEvent` or `BlueprintNativeEvent`.
-- [ ] No magic numbers; constants and constexpr used instead.
-- [ ] UObject modifications strictly confined to the Game Thread.
-- [ ] No inline comments; Javadoc Tooltips used exclusively for UPROPERTY/UFUNCTION.
-- [ ] Code formatted automatically via `clang-format` or strict adherence to the Unreal Style Guide.
-- [ ] Code remains modular and maintainable.
-
----
-
-# Code Quality Goals
-
-Generated code should prioritize:
-- strict adherence to Unreal architecture
-- fast compile times (IWYU)
-- memory safety and garbage collection compliance
-- performance (No tick, Reserved Memory, Enum/FName over strings)
-- readability
-
----
-
-# Priority
-
-Rules defined in this skill override generic coding suggestions when developing Unreal Engine C++ systems.
+Validate according to the active task's authorization. Do not compile, run the editor, execute tests, install tooling, or benchmark against an explicit restriction. Report exactly what was checked and what remains deferred. Source review alone does not establish runtime correctness, saved-asset compatibility, or measured performance.

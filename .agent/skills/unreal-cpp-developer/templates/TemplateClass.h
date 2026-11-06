@@ -1,35 +1,29 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "TEMPLATE_CLASS_NAME.generated.h"
 
-/**
- * UTEMPLATE_CLASS_NAME
- *
- * <Description of what this class does>
- */
+// Replace the class name, module API macro, category, and example members.
+// This is a UObject example; choose the appropriate base and lifecycle for the requested class.
+// Keep these instructions in the template, but omit them from generated project code.
 UCLASS(BlueprintType, Blueprintable)
-    class YOURMODULE_API UTEMPLATE_CLASS_NAME : public UObject
-    {
-        GENERATED_BODY()
+class YOURMODULE_API UTEMPLATE_CLASS_NAME : public UObject
+{
+    GENERATED_BODY()
 
-    public:
-        UTEMPLATE_CLASS_NAME();
+public:
+    UTEMPLATE_CLASS_NAME();
 
-        /**
-         * <Description of the function>
-         *
-         * @param ParamName <Description of parameter>
-         * @return <Description of return value>
-         */
-        UFUNCTION(BlueprintCallable, Category = "YourCategory|YourSubCategory")
-        void ExampleFunction(int ParamName);
+    /**
+     * Sets the example value.
+     * @param InValue The new value to store.
+     */
+    UFUNCTION(BlueprintCallable, Category = "YourCategory|YourSubCategory")
+    void ExampleFunction(int32 InValue);
 
-    protected:
-        /** <Description of the property> */
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "YourCategory|YourSubCategory")
-        int ExampleProperty;
-    };
+protected:
+    /** The current example value. Replace this tooltip with the property's meaning and units. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "YourCategory|YourSubCategory")
+    int32 ExampleProperty;
+};

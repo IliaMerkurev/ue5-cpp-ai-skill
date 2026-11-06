@@ -1,17 +1,15 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "TEMPLATE_CLASS_NAME.h"
-// Include other necessary headers here, e.g., subsystems, logging categories
+// Include other necessary headers here, e.g., subsystems or logging categories.
+// Instructional comments belong to this template only; omit them from generated project code.
 
 UTEMPLATE_CLASS_NAME::UTEMPLATE_CLASS_NAME()
 {
-    // Initialization code here
+    // Initialize defaults here. Move world-dependent work to the appropriate lifecycle hook.
     ExampleProperty = 0;
 }
 
-void UTEMPLATE_CLASS_NAME::ExampleFunction(int ParamName)
+void UTEMPLATE_CLASS_NAME::ExampleFunction(int32 InValue)
 {
-    // Implementation code here
-    // Example logging:
-    // UE_LOG(LogTemp, Log, TEXT("ExampleFunction called with %d"), ParamName);
+    // Replace this example implementation with the requested behavior.
+    ExampleProperty = InValue;
 }
